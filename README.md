@@ -1,1 +1,1 @@
-# aoc22_cpp
+# Advent of Code 2022 puzzles solved in C++
