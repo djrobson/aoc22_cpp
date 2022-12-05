@@ -118,10 +118,8 @@ std::vector<std::stack<char>> get_real_data() {
     return v;
 }
 
-int main() {
-    std::ifstream infile("input05.txt");
-    std::string line;
-    std::vector<std::stack<char>> s1 = get_real_data();
+void do_step1(std::ifstream& infile, std::vector<std::stack<char>>& s1)
+{
     std::string s;
 
     while (std::getline(infile, s))
@@ -137,7 +135,7 @@ int main() {
         infile >> s >> num >> s >> from >> s >> to;
 
         for (int i = 0; i < num; i++) {
-            char c = s1[from-1].top();
+            char c = s1[from - 1].top();
             s1[from - 1].pop();
             s1[to - 1].push(c);
         }
@@ -146,8 +144,53 @@ int main() {
         std::cout << s.top();
     }
     std::cout << std::endl;
+}
+
+void do_step2(std::ifstream& infile, std::vector<std::stack<char>>& s1)
+{
+    std::string s;
+
+    while (std::getline(infile, s))
+    {   // scan until we find the blank line
+        if (s == "") {
+            break;
+        }
+    }
+
+    while (!infile.eof()) {
+        // move 1 from 2 to 1
+        int num, from, to;
+        infile >> s >> num >> s >> from >> s >> to;
+
+        std::stack<char> temp;
+        for (int i = 0; i < num; i++) {
+            char c = s1[from - 1].top();
+            s1[from - 1].pop();
+            temp.push(c);
+        }
+        while (!temp.empty())
+        {   // empty the temp stack back onto the new location
+            char c = temp.top();
+            temp.pop();
+            s1[to - 1].push(c);
+        }
+    }
+    for (auto s : s1) {
+        std::cout << s.top();
+    }
+    std::cout << std::endl;
+}
+
+int main() {
+    std::ifstream infile("input05.txt");
+    std::string line;
+    std::vector<std::stack<char>> s1 = get_real_data();
+
+    do_step2(infile, s1);
+
     //std::cout << "total 1 is " << total1 << std::endl;
     //std::cout << "total 2 is " << total2 << std::endl;
     return 0;
 }
+
 
