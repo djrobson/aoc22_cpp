@@ -7,15 +7,21 @@
 struct ListItem {
     ListItem* next;
     ListItem* prev;
-    int value;
+    int64_t value;
 };
 
-void shift_item(ListItem* item) {
+void shift_item(ListItem* item, size_t total_nums) {
     auto cursor = item;
 
-    int val = item->value;
+    int64_t val = item->value;
     if (val == 0) {
         return;
+    }
+    if (val < 0) {
+        val = (-val) % (total_nums);
+        val = -val;
+    } else {
+        val = val % (total_nums);
     }
 
     // cut this value out of the list
@@ -63,9 +69,23 @@ int main()
     std::ifstream file;
 
     std::cout << "Current path is " << std::filesystem::current_path() << '\n';
+    
+    bool use_sample = false;
+    bool stage2 = true;
 
-    file.open("input20.txt");
-    //file.open("sample.txt");
+    if (use_sample) {
+        file.open("sample.txt");
+    }
+    else {
+        file.open("input20.txt");
+    }
+
+    int decrypt_key = 1;
+    int mix_count_total = 1;
+    if (stage2) {
+        decrypt_key = 811589153;
+        mix_count_total = 10;
+    }
     if (!file.is_open())
     {
         std::cout << "Unable to open the file." << std::endl;
@@ -80,7 +100,7 @@ int main()
     size_t index_of_0 = 0;
     while (std::getline(file, line))
     {
-        int32_t num = std::stoi(line);
+        int64_t num = (uint64_t)std::stoi(line) * decrypt_key;
         if (head == nullptr) {
             ListItem* new_item = new ListItem;
             new_item->next = new_item;
@@ -107,22 +127,25 @@ int main()
 
     //PrintList(head);
     size_t total_nums = input_addrs.size();
-    for (auto item : input_addrs) {
-        //std::cout << "moving: " << item->value << std::endl;
-        shift_item(item);
+    for (int mix_count = 0; mix_count < mix_count_total; mix_count++)
+    {
+        for (auto item : input_addrs) {
+            //std::cout << "moving: " << item->value << std::endl;
+            shift_item(item, total_nums);
+        }
         //PrintList(head);
     }
 
     auto cursor = input_addrs[index_of_0];
-    auto total = 0;
+    int64_t total = 0;
     for (int count = 0; count <= 3000; count++) {
         if (count % 1000 == 0) {
-            //std::cout << cursor->value << " ";
+            std::cout << cursor->value << " ";
             total += cursor->value;
         }
         cursor = cursor->next;
     }
-    //std::cout << "\n";
+    std::cout << "\n";
 
     std::cout << "total: " << total << std::endl;
 }
