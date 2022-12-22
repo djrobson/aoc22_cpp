@@ -4,11 +4,25 @@
 #include <filesystem>
 #include <list>
 
+const static bool use_sample = false;
+const static bool stage2 = true;
+
 struct ListItem {
     ListItem* next;
     ListItem* prev;
     int64_t value;
 };
+
+int64_t euclidean_remainder(int64_t a, int64_t b)
+{
+    //return (a < 0 ? (((a % b) + b) % b) : (a % b));
+    if (a < 0) {
+        return ((-a) % b) + 1;
+    }
+    else {
+        return a % b;
+    }
+}
 
 void shift_item(ListItem* item, size_t total_nums) {
     auto cursor = item;
@@ -17,20 +31,16 @@ void shift_item(ListItem* item, size_t total_nums) {
     if (val == 0) {
         return;
     }
-    if (val < 0) {
-        val = (-val) % (total_nums);
-        val = -val;
-    } else {
-        val = val % (total_nums);
-    }
+    val = euclidean_remainder(val, total_nums-1);
+    //std::cout << "moving " << item->value << " " << val << " spaces\n";
 
     // cut this value out of the list
     // 1<->i<->3 ==> 1<->3
     cursor->prev->next = item->next;
     cursor->next->prev = item->prev;
 
-    if (val < 0) {
-        for (int count = 0; count <= -val; count++) {
+    if (item->value < 0) {
+        for (int count = 0; count < val; count++) {
             cursor = cursor->prev;
         }
     }
@@ -68,11 +78,8 @@ int main()
 {
     std::ifstream file;
 
-    std::cout << "Current path is " << std::filesystem::current_path() << '\n';
-    
-    bool use_sample = false;
-    bool stage2 = true;
-
+    //std::cout << "Current path is " << std::filesystem::current_path() << '\n';
+ 
     if (use_sample) {
         file.open("sample.txt");
     }
@@ -132,6 +139,7 @@ int main()
         for (auto item : input_addrs) {
             //std::cout << "moving: " << item->value << std::endl;
             shift_item(item, total_nums);
+            //PrintList(head);
         }
         //PrintList(head);
     }
